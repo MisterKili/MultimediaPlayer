@@ -5,28 +5,40 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.File
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
 
     private lateinit var floatingButton: FloatingActionButton
     private lateinit var filesRecyclerView: RecyclerView
     private lateinit var filesListAdapter: FilesListAdapter
-    private var filesList: List<File> = ArrayList<File>()
+    private var filesList: ArrayList<File> = ArrayList<File>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        getFiles()
-
         floatingButton = findViewById(R.id.floatingActionButton)
         filesRecyclerView = findViewById(R.id.filesRecyclerView)
-        filesListAdapter = FilesListAdapter(baseContext, filesList as MutableList<File>)
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        floatingButton.setOnClickListener {
+            createMenu(floatingButton)
+        }
+
+        getFiles()
+        filesListAdapter = FilesListAdapter(baseContext, filesList)
 
 
         val layoutManager = LinearLayoutManager(baseContext)
@@ -35,12 +47,31 @@ class MainActivity : AppCompatActivity() {
         filesRecyclerView.adapter = filesListAdapter
     }
 
-    override fun onStart() {
-        super.onStart()
+    private fun createMenu(view: View) {
+        val popup = PopupMenu(view.context, view)
+        val inflater = popup.menuInflater
+        popup.setOnMenuItemClickListener(this)
+        inflater.inflate(R.menu.image_menu, popup.menu)
+        popup.show()
+    }
 
-        floatingButton.setOnClickListener {
-            val intent = Intent(this, CameraActivity::class.java)
-            startActivity(intent)
+    override fun onMenuItemClick(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_item_photo -> {
+                val intent = Intent(this, CameraActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            R.id.menu_item_video -> {
+                Toast.makeText(this, "Video recorder", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.menu_item_record -> {
+                val intent = Intent(this, VoiceRecorder::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> false
         }
     }
 
@@ -55,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("Files", "FileName:" + files[i].name)
         }
 
-        filesList = files.toList()
+        filesList = files.toCollection(ArrayList())
     }
 
     private fun getOutputDirectory(): File {

@@ -17,9 +17,9 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 
-class FilesListAdapter(context: Context, filesList: MutableList<File>) : RecyclerView.Adapter<FilesListAdapter.FilesViewHolder>() {
+class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerView.Adapter<FilesListAdapter.FilesViewHolder>() {
 
-    private var filesList: MutableList<File> = filesList
+    private var filesList: ArrayList<File> = filesList
     private var context = context
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
 
@@ -39,8 +39,7 @@ class FilesListAdapter(context: Context, filesList: MutableList<File>) : Recycle
 
 
     class FilesViewHolder(view: View, filesList: MutableList<File>, context: Context, adapter: FilesListAdapter) :
-        RecyclerView.ViewHolder(view), View.OnLongClickListener, PopupMenu.OnMenuItemClickListener,
-        View.OnClickListener {
+        RecyclerView.ViewHolder(view), View.OnLongClickListener, View.OnClickListener {
         var context: Context
         var image: ImageView
         var fileName: TextView
@@ -49,32 +48,8 @@ class FilesListAdapter(context: Context, filesList: MutableList<File>) : Recycle
 
 
         override fun onLongClick(view: View): Boolean {
-            createMenu(view)
+            deleteFile(view)
             return false
-        }
-
-        private fun createMenu(view: View) {
-            val popup = PopupMenu(view.context, view)
-            val inflater = popup.menuInflater
-            popup.setOnMenuItemClickListener(this)
-            inflater.inflate(R.menu.image_menu, popup.menu)
-            popup.show()
-        }
-
-        override fun onMenuItemClick(item: MenuItem): Boolean {
-            return when (item.itemId) {
-                R.id.menu_item_delete -> {
-                    println("Usuwanaie")
-                    deleteFile(itemView.rootView)
-                    true
-                }
-                R.id.menu_item_modify -> {
-//                    modifyQuote(itemView.rootView)
-                    println("Modyfikacja")
-                    true
-                }
-                else -> false
-            }
         }
 
         private fun deleteFile(view: View) {

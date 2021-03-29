@@ -3,14 +3,15 @@ package com.example.multimediaplayer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
+import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
-import android.util.Log
+import android.text.InputType
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -24,6 +25,8 @@ class VoiceRecorder : AppCompatActivity() {
     private lateinit var stopButton: Button
 
     private var output: String? = null
+    private var fileName: String = "recording3"
+
     private var mediaRecorder: MediaRecorder? = null
     private var state: Boolean = false
     private var recordingStopped: Boolean = false
@@ -36,8 +39,7 @@ class VoiceRecorder : AppCompatActivity() {
         pauseButton = findViewById(R.id.pauseRecordingButton)
         stopButton = findViewById(R.id.stopRecordingButton)
 
-        output = getOutputDirectory().absolutePath + "/recording.mp3"
-
+        setFileName()
     }
 
     private fun getOutputDirectory(): File {
@@ -71,14 +73,16 @@ class VoiceRecorder : AppCompatActivity() {
         }
 
         mediaRecorder = MediaRecorder()
+    }
+
+    private fun startRecording() {
+        output = getOutputDirectory().absolutePath + "/" + fileName + ".mp3"
 
         mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
         mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
         mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
         mediaRecorder?.setOutputFile(output)
-    }
 
-    private fun startRecording() {
         try {
             mediaRecorder?.prepare()
             mediaRecorder?.start()
@@ -123,5 +127,27 @@ class VoiceRecorder : AppCompatActivity() {
         mediaRecorder?.resume()
         pauseButton.text = "Pause"
         recordingStopped = false
+    }
+
+    private fun setFileName() {
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Title")
+
+        // Set up the input
+        val input = EditText(this)
+
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setView(input)
+
+        // Set up the buttons
+        builder.setPositiveButton(
+            "OK"
+        ) { dialog, which -> fileName = input.text.toString() }
+        builder.setNegativeButton(
+            "Cancel"
+        ) { dialog, which -> dialog.cancel() }
+
+        builder.show()
     }
 }

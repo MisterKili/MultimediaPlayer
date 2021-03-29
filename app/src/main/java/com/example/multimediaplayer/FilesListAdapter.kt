@@ -30,7 +30,11 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerV
 
     override fun onBindViewHolder(holder: FilesViewHolder, position: Int) {
         holder.fileName.text = filesList[position].name
-        holder.image.setImageURI(filesList[position].path.toUri())
+        if (filesList[position].path.endsWith(".mp3")) {
+            holder.image.setImageResource(R.drawable.microphone)
+        } else {
+            holder.image.setImageURI(filesList[position].path.toUri())
+        }
     }
 
     override fun getItemCount(): Int {

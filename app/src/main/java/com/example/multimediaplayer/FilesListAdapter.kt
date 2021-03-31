@@ -2,15 +2,10 @@ package com.example.multimediaplayer
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
-import android.os.Environment
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
@@ -67,9 +62,32 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerV
 
         override fun onClick(view: View) {
             val position = adapterPosition
-            val intent = Intent(view.context, PhotoDetailsActivity::class.java)
-            intent.putExtra("photoURI", filesList[position].absolutePath)
-            context.startActivity(intent)
+            val filePath = filesList[position].absolutePath
+            if (isImageFromPath(filePath)) {
+                val intent = Intent(view.context, PhotoDetailsActivity::class.java)
+                intent.putExtra("photoURI", filesList[position].absolutePath)
+                context.startActivity(intent)
+            } else if (isSoundRecordFromPath(filePath)) {
+                Toast.makeText(context, "To sound player!", Toast.LENGTH_SHORT).show()
+                val intent = Intent(view.context, PlayerActivity::class.java)
+                intent.putExtra("fileURI", filesList[position].absolutePath)
+                context.startActivity(intent)
+            }
+
+
+
+        }
+
+        private fun isImageFromPath(path: String): Boolean {
+            return path.endsWith(".jpg") or path.endsWith(".png")
+        }
+
+        private fun isSoundRecordFromPath(path: String): Boolean {
+            return path.endsWith(".mp3")
+        }
+
+        private fun isVideoFromPath(path: String): Boolean {
+            return path.endsWith(".mp4")
         }
 
         init {
@@ -82,4 +100,6 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerV
             this.adapter = adapter
         }
     }
+
+
 }

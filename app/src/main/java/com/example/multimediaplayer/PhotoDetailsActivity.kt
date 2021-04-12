@@ -20,7 +20,6 @@ class PhotoDetailsActivity : AppCompatActivity() {
 
         imageView = findViewById(R.id.imageView)
         imageNameTextView = findViewById(R.id.nameTextView)
-        imageDateTextView = findViewById(R.id.dateTextView)
 
         val extras = intent.extras
         if (extras != null && extras.containsKey("photoURI")) {

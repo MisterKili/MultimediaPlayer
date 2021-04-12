@@ -20,6 +20,7 @@
         <activity android:name=".VoiceRecorder" />
         <activity android:name=".PhotoDetailsActivity" />
         <activity android:name=".CameraActivity" />
+        <activity android:name=".VideoCameraActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

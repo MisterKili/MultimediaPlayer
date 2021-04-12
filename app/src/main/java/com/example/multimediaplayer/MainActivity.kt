@@ -89,7 +89,8 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
                 true
             }
             R.id.menu_item_video -> {
-                Toast.makeText(this, "Video recorder", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, VideoCameraActivity::class.java)
+                startActivity(intent)
                 true
             }
             R.id.menu_item_record -> {

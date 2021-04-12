@@ -4,7 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
@@ -13,25 +13,26 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.core.VideoCapture
+import androidx.camera.core.impl.CaptureConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.File
 
+class VideoCameraActivity : AppCompatActivity() {
 
-class CameraActivity : AppCompatActivity() {
-
-    private var imageCapture: ImageCapture? = null
+    private var videoCapture: VideoCapture? = null
 
     private var fileName: String = ""
 
     private lateinit var outputDirectory: File
     private lateinit var cameraCaptureButton: Button
     private lateinit var viewFinder: PreviewView
+
+    private var isRecording = false
 
 //    private lateinit var database: FilesDatabase
 
@@ -54,48 +55,55 @@ class CameraActivity : AppCompatActivity() {
         cameraCaptureButton = findViewById(R.id.camera_capture_button)
         viewFinder = findViewById(R.id.viewFinder)
 
-        // Set up the listener for take photo button
-        cameraCaptureButton.setOnClickListener { takePhoto() }
+        cameraCaptureButton.setOnClickListener { recordVideo() }
 
         outputDirectory = getOutputDirectory()
     }
 
+    @SuppressLint("RestrictedApi")
+    private fun recordVideo(): Boolean {
+        val videoCapture = videoCapture ?: return false
 
-    private fun takePhoto() {
-        // Get a stable reference of the modifiable image capture use case
-        val imageCapture = imageCapture ?: return
+        if (!isRecording) {
+            Toast.makeText(this, "Start recording", Toast.LENGTH_SHORT).show()
 
-        val photoFile = File(
-            outputDirectory, "$fileName.jpg"
-        )
+            cameraCaptureButton.setBackgroundColor(Color.GREEN)
 
-        // Create output options object which contains file + metadata
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+            val videoFile = File(
+                outputDirectory,
+                "$fileName.avi"
+            )
 
-        // Set up image capture listener, which is triggered after photo has
-        // been taken
-        imageCapture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
-                }
+            videoCapture.startRecording(
+                videoFile,
+                ContextCompat.getMainExecutor(this),
+                object : VideoCapture.OnVideoSavedCallback {
+                    override fun onVideoSaved(file: File) {
+                        Log.i("AAAA", "Video File : $file")
+                        Toast.makeText(applicationContext, "Recorded", Toast.LENGTH_SHORT).show()
+                    }
 
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
-                    val msg = "Photo capture succeeded: $savedUri"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, msg)
+                    override fun onError(
+                        videoCaptureError: Int,
+                        message: String,
+                        cause: Throwable?
+                    ) {
+                        Log.i("AAAA", "Video Error: $message")
+                    }
+                })
 
+            isRecording = !isRecording
+        } else {
+            Toast.makeText(this, "Stop recording", Toast.LENGTH_SHORT).show()
 
-//                    lifecycleScope.launch {
-//                        val mediaFile = MediaFile(fileName, photoFile.absolutePath, "PHOTO", false, "", "", "")
-//                        database.filesDao().insert(mediaFile)
-//                    }
-                }
-            })
+            videoCapture.stopRecording()
 
+            cameraCaptureButton.setBackgroundColor(Color.RED)
+
+            isRecording = !isRecording
+        }
+
+        return true
     }
 
     private fun setFileName() {
@@ -145,7 +153,7 @@ class CameraActivity : AppCompatActivity() {
 
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
+                    this, cameraSelector, preview, videoCapture
                 )
 
             } catch (exc: Exception) {
@@ -154,7 +162,11 @@ class CameraActivity : AppCompatActivity() {
 
         }, ContextCompat.getMainExecutor(this))
 
-        imageCapture = ImageCapture.Builder()
+        val videoCaptureConfig = VideoCapture.DEFAULT_CONFIG.getConfig(null)
+
+        videoCapture = VideoCapture.Builder
+            .fromConfig(videoCaptureConfig)
+            .setDefaultCaptureConfig(CaptureConfig.defaultEmptyCaptureConfig())
             .build()
     }
 
@@ -190,9 +202,9 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-
     companion object {
         private const val TAG = "CameraXBasic"
+        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(
             Manifest.permission.CAMERA,

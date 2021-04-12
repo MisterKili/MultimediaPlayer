@@ -91,7 +91,7 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
                 val intent = Intent(view.context, PhotoDetailsActivity::class.java)
                 intent.putExtra("photoURI", filesList[position].absolutePath)
                 context.startActivity(intent)
-            } else if (isSoundRecordFromPath(filePath)) {
+            } else if (isSoundRecordFromPath(filePath) || isVideoFromPath(filePath)) {
                 val intent = Intent(view.context, PlayerActivity::class.java)
                 intent.putExtra("fileURI", filesList[position].absolutePath)
                 context.startActivity(intent)
@@ -107,7 +107,7 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
         }
 
         private fun isVideoFromPath(path: String): Boolean {
-            return path.endsWith(".mp4")
+            return path.endsWith(".avi")
         }
 
         private fun starClicked(view: ImageView) {

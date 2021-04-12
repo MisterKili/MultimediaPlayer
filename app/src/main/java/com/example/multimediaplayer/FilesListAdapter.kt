@@ -28,9 +28,12 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
 
     override fun onBindViewHolder(holder: FilesViewHolder, position: Int) {
         holder.fileName.text = filesList[position].name
-        if (filesList[position].absolutePath.endsWith(".mp3")) {
+
+        if (isSoundRecordFromPath(filesList[position].absolutePath)) {
             holder.image.setImageResource(R.drawable.microphone)
-        } else {
+        } else if (isVideoFromPath(filesList[position].absolutePath)) {
+            holder.image.setImageResource(R.drawable.clapperboard)
+        } else if (isImageFromPath(filesList[position].absolutePath)){
             holder.image.setImageURI(filesList[position].absolutePath.toUri())
         }
 
@@ -47,6 +50,19 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
         return filesList.size
     }
 
+    companion object {
+        fun isImageFromPath(path: String): Boolean {
+            return path.endsWith(".jpg") or path.endsWith(".png")
+        }
+
+        fun isSoundRecordFromPath(path: String): Boolean {
+            return path.endsWith(".mp3")
+        }
+
+        fun isVideoFromPath(path: String): Boolean {
+            return path.endsWith(".avi")
+        }
+    }
 
     class FilesViewHolder(view: View, filesList: MutableList<File>, favoritesHelper: FavoritesHelper, context: Context, adapter: FilesListAdapter) :
         RecyclerView.ViewHolder(view), View.OnLongClickListener, View.OnClickListener {
@@ -98,17 +114,7 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
             }
         }
 
-        private fun isImageFromPath(path: String): Boolean {
-            return path.endsWith(".jpg") or path.endsWith(".png")
-        }
 
-        private fun isSoundRecordFromPath(path: String): Boolean {
-            return path.endsWith(".mp3")
-        }
-
-        private fun isVideoFromPath(path: String): Boolean {
-            return path.endsWith(".avi")
-        }
 
         private fun starClicked(view: ImageView) {
             val favoritesSet = favoritesHelper.getFavoriteFiles()

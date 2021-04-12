@@ -58,4 +58,13 @@ dependencies {
 
     implementation 'com.google.android.exoplayer:exoplayer:2.13.2'
 
+//    apply plugin: 'kotlin-kapt'
+//
+//    implementation 'android.arch.persistence.room:runtime:2.2.6'
+//    kapt 'android.arch.persistence.room:compiler:2.2.6'
+//    implementation "androidx.room:room-ktx:2.2.6"
+
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-alpha02"
+
+
 }

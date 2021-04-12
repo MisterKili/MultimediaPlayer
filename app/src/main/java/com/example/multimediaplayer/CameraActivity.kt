@@ -1,8 +1,16 @@
 package com.example.multimediaplayer
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.hardware.Camera.open
+import android.hardware.camera2.CameraDevice
+import android.hardware.camera2.CameraManager
+import android.media.CamcorderProfile
+import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
@@ -16,23 +24,39 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+//import com.example.multimediaplayer.database.FilesDatabase
+//import com.example.multimediaplayer.model.FileType
+//import com.example.multimediaplayer.model.MediaFile
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
-
-typealias LumaListener = (luma: Double) -> Unit
 
 
 class CameraActivity : AppCompatActivity() {
 
     private var imageCapture: ImageCapture? = null
+    private var videoCapture: VideoCapture? = null
+
+    private lateinit var recorder: MediaRecorder
+
     private var fileName: String = ""
 
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var cameraCaptureButton: Button
     private lateinit var viewFinder: PreviewView
+
+    private var isRecording = false
+
+//    private lateinit var database: FilesDatabase
+
+//    private val cameraManager: CameraManager by lazy {
+//        applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+//    }
+//    private lateinit var camera: CameraDevice
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +70,8 @@ class CameraActivity : AppCompatActivity() {
             )
         }
 
+//        database = FilesDatabase.getDatabase(this)
+
         setFileName()
 
         cameraCaptureButton = findViewById(R.id.camera_capture_button)
@@ -54,23 +80,20 @@ class CameraActivity : AppCompatActivity() {
         // Set up the listener for take photo button
         cameraCaptureButton.setOnClickListener { takePhoto() }
 
+        cameraCaptureButton.setOnLongClickListener { recordVideo() }
+
         outputDirectory = getOutputDirectory()
 
-        cameraExecutor = Executors.newSingleThreadExecutor()
+//        cameraExecutor = Executors.newSingleThreadExecutor()
     }
+
 
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
-        // Create time-stamped output file to hold the image
         val photoFile = File(
-            outputDirectory,
-//            SimpleDateFormat(
-//                FILENAME_FORMAT, Locale.US
-//            ).format(System.currentTimeMillis())
-            fileName
-                    + ".jpg"
+            outputDirectory, "$fileName.jpg"
         )
 
         // Create output options object which contains file + metadata
@@ -91,9 +114,56 @@ class CameraActivity : AppCompatActivity() {
                     val msg = "Photo capture succeeded: $savedUri"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
+
+
+//                    lifecycleScope.launch {
+//                        val mediaFile = MediaFile(fileName, photoFile.absolutePath, "PHOTO", false, "", "", "")
+//                        database.filesDao().insert(mediaFile)
+//                    }
                 }
             })
 
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun recordVideo(): Boolean {
+        val videoCapture = videoCapture ?: return false
+
+        if (!isRecording) {
+            Toast.makeText(this, "Start recording", Toast.LENGTH_SHORT).show()
+
+            val videoFile = File(
+                outputDirectory,
+                "$fileName.mp4"
+            )
+
+            videoCapture.startRecording(
+                videoFile,
+                cameraExecutor,
+                object: VideoCapture.OnVideoSavedCallback {
+                    override fun onVideoSaved(file: File) {
+                        Log.i("AAAA", "Video File : $file")
+                    }
+
+                    override fun onError(videoCaptureError: Int, message: String, cause: Throwable?) {
+                        Log.i("AAAA", "Video Error: $message")
+                    }
+            })
+
+            cameraCaptureButton.setBackgroundColor(Color.BLUE)
+
+            isRecording = !isRecording
+        } else {
+            Toast.makeText(this, "Stop recording", Toast.LENGTH_SHORT).show()
+
+            recorder.stop()
+
+            cameraCaptureButton.setBackgroundColor(Color.RED)
+
+            isRecording = !isRecording
+        }
+
+        return true
     }
 
     private fun setFileName() {
@@ -119,6 +189,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
 
+    @SuppressLint("RestrictedApi")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -154,6 +225,25 @@ class CameraActivity : AppCompatActivity() {
         imageCapture = ImageCapture.Builder()
             .build()
 
+//        val videoCaptureConfig = VideoCapture.DEFAULT_CONFIG.getConfig(null)
+//
+//        videoCapture = VideoCapture.Builder
+//            .fromConfig(videoCaptureConfig)
+//            .setAudioRecordSource(MediaRecorder.AudioSource.MIC)
+//            .build()
+
+//        recorder = MediaRecorder()
+//        recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT)
+//        recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT)
+//        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+////        recorder.setVideoSize(, HEIGHT);
+////        recorder.setVideoFrameRate(FRAME_RATE);
+//        recorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+////        recorder.setVideoEncodingBitRate(VIDEO_BITRATE)
+////        recorder.setAudioChannels(AUDIO_CHANNELS)
+////        recorder.setAudioSamplingRate(SAMPLE_RATE)
+//        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+////        recorder.setAudioEncodingBitRate(AUDIO_BITRATE)
 
     }
 
@@ -171,10 +261,10 @@ class CameraActivity : AppCompatActivity() {
             mediaDir else filesDir
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        cameraExecutor.shutdown()
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        cameraExecutor.shutdown()
+//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:
@@ -199,6 +289,9 @@ class CameraActivity : AppCompatActivity() {
         private const val TAG = "CameraXBasic"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+        )
     }
 }

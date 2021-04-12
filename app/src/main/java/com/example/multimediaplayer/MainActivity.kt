@@ -9,10 +9,18 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+//import com.example.multimediaplayer.database.FilesDatabase
+//import com.example.multimediaplayer.model.FileType
+//import com.example.multimediaplayer.model.MediaFile
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
 
@@ -20,6 +28,11 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
     private lateinit var filesRecyclerView: RecyclerView
     private lateinit var filesListAdapter: FilesListAdapter
     private var filesList: ArrayList<File> = ArrayList<File>()
+    private lateinit var favoritesHelper: FavoritesHelper
+
+    private var favoritesFileNamesSet: Set<String> = emptySet()
+
+//    private lateinit var database: FilesDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +41,13 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
         floatingButton = findViewById(R.id.floatingActionButton)
         filesRecyclerView = findViewById(R.id.filesRecyclerView)
 
+        filesRecyclerView.addItemDecoration(
+            DividerItemDecoration(this,
+            DividerItemDecoration.VERTICAL)
+        )
+
+
+        favoritesHelper = FavoritesHelper(getOutputDirectory())
     }
 
     override fun onStart() {
@@ -37,8 +57,14 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
             createMenu(floatingButton)
         }
 
+//        database = FilesDatabase.getDatabase(this)
+//
+//        lifecycleScope.launch {
+//            filesList = database.filesDao().getAllFiles() as ArrayList<MediaFile>
+//        }
+
         getFiles()
-        filesListAdapter = FilesListAdapter(baseContext, filesList)
+        filesListAdapter = FilesListAdapter(baseContext, filesList, favoritesHelper)
 
 
         val layoutManager = LinearLayoutManager(baseContext)
@@ -76,11 +102,10 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
     }
 
     private fun getFiles() {
-
         val path: String = getOutputDirectory().absolutePath
         Log.d("Files", "Path: $path")
         val directory = File(path)
-        val files = directory.listFiles()
+        val files = directory.listFiles().filter { x -> !x.name.endsWith(".txt") }
         Log.d("Files", "Size: " + files.size)
         for (i in files.indices) {
             Log.d("Files", "FileName:" + files[i].name)
@@ -96,4 +121,6 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
         return if (mediaDir != null && mediaDir.exists())
             mediaDir else filesDir
     }
+
+
 }

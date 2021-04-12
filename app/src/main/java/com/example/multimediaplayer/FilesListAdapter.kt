@@ -10,26 +10,37 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
+//import com.example.multimediaplayer.database.FilesDatabase
+//import com.example.multimediaplayer.model.MediaFile
 import java.io.File
 
-class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerView.Adapter<FilesListAdapter.FilesViewHolder>() {
+class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHelper: FavoritesHelper) : RecyclerView.Adapter<FilesListAdapter.FilesViewHolder>() {
 
     private var filesList: ArrayList<File> = filesList
+    private var favoritesHelper = favoritesHelper
     private var context = context
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilesViewHolder {
         val view = mInflater.inflate(R.layout.image_item, parent, false)
-        return FilesViewHolder(view, filesList, context, this)
+        return FilesViewHolder(view, filesList, favoritesHelper, context, this)
     }
 
     override fun onBindViewHolder(holder: FilesViewHolder, position: Int) {
         holder.fileName.text = filesList[position].name
-        if (filesList[position].path.endsWith(".mp3")) {
+        if (filesList[position].absolutePath.endsWith(".mp3")) {
             holder.image.setImageResource(R.drawable.microphone)
         } else {
-            holder.image.setImageURI(filesList[position].path.toUri())
+            holder.image.setImageURI(filesList[position].absolutePath.toUri())
         }
+
+        val favoritesSet = favoritesHelper.getFavoriteFiles()
+        if (favoritesSet.contains(filesList[position].name)) {
+            holder.star.setImageResource(R.drawable.star_full)
+        } else {
+            holder.star.setImageResource(R.drawable.star_empty)
+        }
+
     }
 
     override fun getItemCount(): Int {
@@ -37,12 +48,15 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerV
     }
 
 
-    class FilesViewHolder(view: View, filesList: MutableList<File>, context: Context, adapter: FilesListAdapter) :
+    class FilesViewHolder(view: View, filesList: MutableList<File>, favoritesHelper: FavoritesHelper, context: Context, adapter: FilesListAdapter) :
         RecyclerView.ViewHolder(view), View.OnLongClickListener, View.OnClickListener {
         var context: Context
         var image: ImageView
+        var star: ImageView
+
         var fileName: TextView
         var filesList: MutableList<File>
+        var favoritesHelper: FavoritesHelper
         private var adapter: FilesListAdapter
 
 
@@ -54,9 +68,19 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerV
         private fun deleteFile(view: View) {
             val position = adapterPosition
             Toast.makeText(context, "Usunieto", Toast.LENGTH_SHORT).show()
-            if (filesList[position].delete()) {
+            val file: File = File(filesList[position].absolutePath)
+            if (file.delete()) {
+                // Default? Main?
+//                CoroutineScope(Dispatchers.Default).launch {
+//                    var database = FilesDatabase.getDatabase(context)
+//                    database.filesDao().delete(filesList[position])
+//                }
+
                 filesList.removeAt(position)
                 adapter.notifyItemRemoved(position)
+
+                // delete from database
+
             }
         }
 
@@ -68,14 +92,10 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerV
                 intent.putExtra("photoURI", filesList[position].absolutePath)
                 context.startActivity(intent)
             } else if (isSoundRecordFromPath(filePath)) {
-                Toast.makeText(context, "To sound player!", Toast.LENGTH_SHORT).show()
                 val intent = Intent(view.context, PlayerActivity::class.java)
                 intent.putExtra("fileURI", filesList[position].absolutePath)
                 context.startActivity(intent)
             }
-
-
-
         }
 
         private fun isImageFromPath(path: String): Boolean {
@@ -90,14 +110,41 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>) : RecyclerV
             return path.endsWith(".mp4")
         }
 
+        private fun starClicked(view: ImageView) {
+            val favoritesSet = favoritesHelper.getFavoriteFiles()
+
+            if (!favoritesSet.contains(filesList[adapterPosition].name)) {
+                view.setImageResource(R.drawable.star_full)
+                addToFavorites()
+            } else {
+                view.setImageResource(R.drawable.star_empty)
+                removeFromFavorites()
+            }
+        }
+
+        private fun addToFavorites() {
+            favoritesHelper.addFileToFavorite(filesList[adapterPosition])
+        }
+
+        private fun removeFromFavorites() {
+            favoritesHelper.removeFromFavorite(filesList[adapterPosition])
+        }
+
         init {
             view.setOnLongClickListener(this)
             view.setOnClickListener(this)
             this.context = context
             this.image = view.findViewById(R.id.item_imageView)
             this.fileName = view.findViewById(R.id.item_name_textView)
+            this.star = view.findViewById(R.id.favoriteImageView)
+
+            star.setOnClickListener {
+               starClicked(it as ImageView)
+            }
+
             this.filesList = filesList
             this.adapter = adapter
+            this.favoritesHelper = favoritesHelper
         }
     }
 

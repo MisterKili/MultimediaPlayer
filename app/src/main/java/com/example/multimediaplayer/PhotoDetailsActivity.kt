@@ -12,7 +12,6 @@ class PhotoDetailsActivity : AppCompatActivity() {
 
     private lateinit var imageView: ImageView
     private lateinit var imageNameTextView: TextView
-    private lateinit var imageDateTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

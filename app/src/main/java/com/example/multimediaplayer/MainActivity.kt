@@ -1,23 +1,20 @@
 package com.example.multimediaplayer
 
+//import com.example.multimediaplayer.database.FilesDatabase
+//import com.example.multimediaplayer.model.FileType
+//import com.example.multimediaplayer.model.MediaFile
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
-import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
+import android.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-//import com.example.multimediaplayer.database.FilesDatabase
-//import com.example.multimediaplayer.model.FileType
-//import com.example.multimediaplayer.model.MediaFile
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -26,6 +23,8 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
 
     private lateinit var floatingButton: FloatingActionButton
     private lateinit var filesRecyclerView: RecyclerView
+    private lateinit var searchView: SearchView
+
     private lateinit var filesListAdapter: FilesListAdapter
     private var filesList: ArrayList<File> = ArrayList<File>()
     private lateinit var favoritesHelper: FavoritesHelper
@@ -40,10 +39,13 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
 
         floatingButton = findViewById(R.id.floatingActionButton)
         filesRecyclerView = findViewById(R.id.filesRecyclerView)
+        searchView = findViewById(R.id.searchView)
 
         filesRecyclerView.addItemDecoration(
-            DividerItemDecoration(this,
-            DividerItemDecoration.VERTICAL)
+            DividerItemDecoration(
+                this,
+                DividerItemDecoration.VERTICAL
+            )
         )
 
 
@@ -71,6 +73,19 @@ class MainActivity : AppCompatActivity(), PopupMenu.OnMenuItemClickListener {
 
         filesRecyclerView.layoutManager = layoutManager
         filesRecyclerView.adapter = filesListAdapter
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                filesListAdapter.filter(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filesListAdapter.filter(newText)
+                return true
+            }
+        })
+        filesRecyclerView.invalidate()
     }
 
     private fun createMenu(view: View) {

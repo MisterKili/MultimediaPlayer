@@ -10,16 +10,24 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
-//import com.example.multimediaplayer.database.FilesDatabase
-//import com.example.multimediaplayer.model.MediaFile
 import java.io.File
 
-class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHelper: FavoritesHelper) : RecyclerView.Adapter<FilesListAdapter.FilesViewHolder>() {
+class FilesListAdapter(
+    context: Context,
+    filesList: ArrayList<File>,
+    favoritesHelper: FavoritesHelper
+) : RecyclerView.Adapter<FilesListAdapter.FilesViewHolder>() {
 
     private var filesList: ArrayList<File> = filesList
+    private var filesListCopy = ArrayList<File>()
+
     private var favoritesHelper = favoritesHelper
     private var context = context
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
+
+    init {
+        filesListCopy.addAll(filesList)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilesViewHolder {
         val view = mInflater.inflate(R.layout.image_item, parent, false)
@@ -50,6 +58,23 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
         return filesList.size
     }
 
+    fun filter(text: String?) {
+        filesList.clear()
+        if (text != null) {
+            if (text.isEmpty()) {
+                filesList.addAll(filesListCopy)
+            } else {
+                var textLower = text.toLowerCase()
+                for (file in filesListCopy) {
+                    if (file.name.toLowerCase().contains(textLower)) {
+                        filesList.add(file)
+                    }
+                }
+            }
+        }
+        notifyDataSetChanged()
+    }
+
     companion object {
         fun isImageFromPath(path: String): Boolean {
             return path.endsWith(".jpg") or path.endsWith(".png")
@@ -64,7 +89,13 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
         }
     }
 
-    class FilesViewHolder(view: View, filesList: MutableList<File>, favoritesHelper: FavoritesHelper, context: Context, adapter: FilesListAdapter) :
+    class FilesViewHolder(
+        view: View,
+        filesList: MutableList<File>,
+        favoritesHelper: FavoritesHelper,
+        context: Context,
+        adapter: FilesListAdapter
+    ) :
         RecyclerView.ViewHolder(view), View.OnLongClickListener, View.OnClickListener {
         var context: Context
         var image: ImageView
@@ -94,9 +125,6 @@ class FilesListAdapter(context: Context, filesList: ArrayList<File>, favoritesHe
 
                 filesList.removeAt(position)
                 adapter.notifyItemRemoved(position)
-
-                // delete from database
-
             }
         }
 

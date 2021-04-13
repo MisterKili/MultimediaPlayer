@@ -3,8 +3,8 @@
 
     <item
         android:id="@+id/sort_asc"
-        android:title="Sort ASC" />
+        android:title="@string/sort_asc" />
     <item
         android:id="@+id/sort_desc"
-        android:title="Sort DESC" />
+        android:title="@string/sort_desc" />
 </menu>

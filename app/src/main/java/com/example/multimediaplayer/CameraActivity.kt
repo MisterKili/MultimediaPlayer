@@ -84,9 +84,7 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
-                    val msg = "Photo capture succeeded: $savedUri"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, msg)
+                    Toast.makeText(baseContext, getString(R.string.image_captured), Toast.LENGTH_SHORT).show()
 
 
 //                    lifecycleScope.launch {
@@ -101,7 +99,7 @@ class CameraActivity : AppCompatActivity() {
     private fun setFileName() {
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Title")
+        builder.setTitle(getString(R.string.provide_file_name))
 
         // Set up the input
         val input = EditText(this)
@@ -111,10 +109,10 @@ class CameraActivity : AppCompatActivity() {
 
         // Set up the buttons
         builder.setPositiveButton(
-            "OK"
+            getString(R.string.OK)
         ) { dialog, which -> fileName = input.text.toString() }
         builder.setNegativeButton(
-            "Cancel"
+            getString(R.string.cancel)
         ) { dialog, which -> dialog.cancel() }
 
         builder.show()
@@ -182,7 +180,7 @@ class CameraActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(
                     this,
-                    "Permissions not granted by the user.",
+                    getString(R.string.permissions_not_granted),
                     Toast.LENGTH_SHORT
                 ).show()
                 finish()

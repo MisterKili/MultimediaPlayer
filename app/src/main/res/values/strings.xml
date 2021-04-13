@@ -11,4 +11,13 @@
     <string name="start">Start</string>
     <string name="pause">Pause</string>
     <string name="stop">Stop</string>
+    <string name="image_captured">Image captured</string>
+    <string name="provide_file_name">Please provide file name</string>
+    <string name="OK">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="permissions_not_granted">Permissions not granted by the user.</string>
+    <string name="deleted">Deleted</string>
+    <string name="video_saved">Video saved</string>
+    <string name="resume">Resume</string>
+    <string name="pasue">Pause</string>
 </resources>

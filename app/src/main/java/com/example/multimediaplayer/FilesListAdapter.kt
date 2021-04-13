@@ -114,7 +114,7 @@ class FilesListAdapter(
 
         private fun deleteFile(view: View) {
             val position = adapterPosition
-            Toast.makeText(context, "Usunieto", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.deleted), Toast.LENGTH_SHORT).show()
             val file: File = File(filesList[position].absolutePath)
             if (file.delete()) {
                 // Default? Main?

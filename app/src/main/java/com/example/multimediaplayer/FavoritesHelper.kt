@@ -29,8 +29,6 @@ class FavoritesHelper(val outputDirectory: File) {
             favoriteFile.createNewFile()
 
         favoriteFile.appendText("${mediaFile.name}\n")
-
-        println("AAAAAA " + getFavoriteFiles())
     }
 
     fun removeFromFavorite(mediaFile: File) {

@@ -25,7 +25,7 @@ class VoiceRecorder : AppCompatActivity() {
     private lateinit var stopButton: Button
 
     private var output: String? = null
-    private var fileName: String = "recording3"
+    private var fileName: String = ""
 
     private var mediaRecorder: MediaRecorder? = null
     private var state: Boolean = false
@@ -87,7 +87,6 @@ class VoiceRecorder : AppCompatActivity() {
             mediaRecorder?.prepare()
             mediaRecorder?.start()
             state = true
-            Toast.makeText(this, "Recording started!", Toast.LENGTH_SHORT).show()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         } catch (e: IOException) {
@@ -100,8 +99,6 @@ class VoiceRecorder : AppCompatActivity() {
             mediaRecorder?.stop()
             mediaRecorder?.release()
             state = false
-        }else{
-            Toast.makeText(this, "You are not recording right now!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -110,10 +107,9 @@ class VoiceRecorder : AppCompatActivity() {
     private fun pauseRecording() {
         if(state) {
             if(!recordingStopped){
-                Toast.makeText(this,"Stopped!", Toast.LENGTH_SHORT).show()
                 mediaRecorder?.pause()
                 recordingStopped = true
-                pauseButton.text = "Resume"
+                pauseButton.text = getString(R.string.resume)
             }else{
                 resumeRecording()
             }
@@ -123,16 +119,15 @@ class VoiceRecorder : AppCompatActivity() {
     @SuppressLint("RestrictedApi", "SetTextI18n")
     @TargetApi(Build.VERSION_CODES.N)
     private fun resumeRecording() {
-        Toast.makeText(this,"Resume!", Toast.LENGTH_SHORT).show()
         mediaRecorder?.resume()
-        pauseButton.text = "Pause"
+        pauseButton.text = getString(R.string.pause)
         recordingStopped = false
     }
 
     private fun setFileName() {
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Title")
+        builder.setTitle(R.string.provide_file_name)
 
         // Set up the input
         val input = EditText(this)
@@ -142,10 +137,10 @@ class VoiceRecorder : AppCompatActivity() {
 
         // Set up the buttons
         builder.setPositiveButton(
-            "OK"
+            R.string.OK
         ) { dialog, which -> fileName = input.text.toString() }
         builder.setNegativeButton(
-            "Cancel"
+            R.string.cancel
         ) { dialog, which -> dialog.cancel() }
 
         builder.show()

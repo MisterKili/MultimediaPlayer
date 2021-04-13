@@ -53,6 +53,8 @@ class VideoCameraActivity : AppCompatActivity() {
         setFileName()
 
         cameraCaptureButton = findViewById(R.id.camera_capture_button)
+        cameraCaptureButton.setText(R.string.start_video)
+
         viewFinder = findViewById(R.id.viewFinder)
 
         cameraCaptureButton.setOnClickListener { recordVideo() }
@@ -65,8 +67,6 @@ class VideoCameraActivity : AppCompatActivity() {
         val videoCapture = videoCapture ?: return false
 
         if (!isRecording) {
-            Toast.makeText(this, "Start recording", Toast.LENGTH_SHORT).show()
-
             cameraCaptureButton.setBackgroundColor(Color.GREEN)
 
             val videoFile = File(
@@ -79,8 +79,7 @@ class VideoCameraActivity : AppCompatActivity() {
                 ContextCompat.getMainExecutor(this),
                 object : VideoCapture.OnVideoSavedCallback {
                     override fun onVideoSaved(file: File) {
-                        Log.i("AAAA", "Video File : $file")
-                        Toast.makeText(applicationContext, "Recorded", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(applicationContext, getString(R.string.video_saved), Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onError(
@@ -94,11 +93,10 @@ class VideoCameraActivity : AppCompatActivity() {
 
             isRecording = !isRecording
         } else {
-            Toast.makeText(this, "Stop recording", Toast.LENGTH_SHORT).show()
+            cameraCaptureButton.setBackgroundColor(Color.RED)
+            cameraCaptureButton.setText(R.string.stop_video)
 
             videoCapture.stopRecording()
-
-            cameraCaptureButton.setBackgroundColor(Color.RED)
 
             isRecording = !isRecording
         }
@@ -109,7 +107,7 @@ class VideoCameraActivity : AppCompatActivity() {
     private fun setFileName() {
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Title")
+        builder.setTitle(R.string.provide_file_name)
 
         // Set up the input
         val input = EditText(this)
@@ -119,10 +117,10 @@ class VideoCameraActivity : AppCompatActivity() {
 
         // Set up the buttons
         builder.setPositiveButton(
-            "OK"
+            R.string.OK
         ) { dialog, which -> fileName = input.text.toString() }
         builder.setNegativeButton(
-            "Cancel"
+            R.string.cancel
         ) { dialog, which -> dialog.cancel() }
 
         builder.show()
@@ -194,7 +192,7 @@ class VideoCameraActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(
                     this,
-                    "Permissions not granted by the user.",
+                    R.string.permissions_not_granted,
                     Toast.LENGTH_SHORT
                 ).show()
                 finish()
@@ -204,7 +202,6 @@ class VideoCameraActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "CameraXBasic"
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(
             Manifest.permission.CAMERA,

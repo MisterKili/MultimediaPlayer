@@ -18,7 +18,7 @@ class FilesListAdapter(
     favoritesHelper: FavoritesHelper
 ) : RecyclerView.Adapter<FilesListAdapter.FilesViewHolder>() {
 
-    private var filesList: ArrayList<File> = filesList
+    var filesList: ArrayList<File> = filesList
     private var filesListCopy = ArrayList<File>()
 
     private var favoritesHelper = favoritesHelper

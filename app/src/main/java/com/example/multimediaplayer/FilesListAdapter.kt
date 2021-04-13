@@ -41,7 +41,7 @@ class FilesListAdapter(
             holder.image.setImageResource(R.drawable.microphone)
         } else if (isVideoFromPath(filesList[position].absolutePath)) {
             holder.image.setImageResource(R.drawable.clapperboard)
-        } else if (isImageFromPath(filesList[position].absolutePath)){
+        } else if (isImageFromPath(filesList[position].absolutePath)) {
             holder.image.setImageURI(filesList[position].absolutePath.toUri())
         }
 
@@ -143,7 +143,6 @@ class FilesListAdapter(
         }
 
 
-
         private fun starClicked(view: ImageView) {
             val favoritesSet = favoritesHelper.getFavoriteFiles()
 
@@ -173,7 +172,7 @@ class FilesListAdapter(
             this.star = view.findViewById(R.id.favoriteImageView)
 
             star.setOnClickListener {
-               starClicked(it as ImageView)
+                starClicked(it as ImageView)
             }
 
             this.filesList = filesList

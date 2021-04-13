@@ -7,12 +7,11 @@ import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.InputType
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.File
@@ -54,11 +53,20 @@ class VoiceRecorder : AppCompatActivity() {
         super.onStart()
 
         startButton.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                val permissions = arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                ActivityCompat.requestPermissions(this, permissions,0)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.RECORD_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                val permissions = arrayOf(
+                    android.Manifest.permission.RECORD_AUDIO,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                ActivityCompat.requestPermissions(this, permissions, 0)
             } else {
                 startRecording()
             }
@@ -94,8 +102,8 @@ class VoiceRecorder : AppCompatActivity() {
         }
     }
 
-    private fun stopRecording(){
-        if(state){
+    private fun stopRecording() {
+        if (state) {
             mediaRecorder?.stop()
             mediaRecorder?.release()
             state = false
@@ -105,12 +113,12 @@ class VoiceRecorder : AppCompatActivity() {
     @SuppressLint("RestrictedApi", "SetTextI18n")
     @TargetApi(Build.VERSION_CODES.N)
     private fun pauseRecording() {
-        if(state) {
-            if(!recordingStopped){
+        if (state) {
+            if (!recordingStopped) {
                 mediaRecorder?.pause()
                 recordingStopped = true
                 pauseButton.text = getString(R.string.resume)
-            }else{
+            } else {
                 resumeRecording()
             }
         }
